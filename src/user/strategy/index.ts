@@ -1,0 +1,1 @@
+export * from '@app/user/strategy/jwt.startegy'
