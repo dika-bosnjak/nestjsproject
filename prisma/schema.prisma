@@ -31,16 +31,31 @@ model User {
   city      String
   state     String
   zip       String
+  Document  Document[]
 
   @@map("users")
 }
 
 model DocumentType {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   @unique
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String     @unique
   content   Json
+  Document  Document[]
 
   @@map("document_type")
+}
+
+model Document {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  authorId       Int
+  author         User         @relation(fields: [authorId], references: [id])
+  documentTypeId Int
+  documentType   DocumentType @relation(fields: [documentTypeId], references: [id])
+  content        Json
+
+  @@map("document")
 }
