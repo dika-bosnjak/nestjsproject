@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/prisma/prisma.service';
 import { AuthDto, UserDto } from '@app/user/dto';
 import * as argon from 'argon2';
@@ -98,16 +98,22 @@ export class UserService {
 
     async getUserById(id: number): Promise<User>{
         //get the user by the id
-        const user = await this.prisma.user.findFirst({
-            where: {
-                id: id
-            }
-        })
-        //remove the password from the user that is returned in the response
-        delete user.password;
-        //if user does not exists throw err
-        if (!user) throw new NotFoundException
-        return user
+        if (id) {
+            const user = await this.prisma.user.findFirst({
+                where: {
+                    id: id
+                }
+            })
+            //if user does not exists throw err
+            if (!user) throw new NotFoundException
+            //remove the password from the user that is returned in the response
+            delete user.password;
+            return user
+        }
+
+        throw new BadRequestException
+
+
     }
 
     async getUsers(firstName?: string): Promise<User[]>{
@@ -184,6 +190,7 @@ export class UserService {
         })
         //if user does not exists throw err
         if (!user) throw new NotFoundException
+        delete user.password
         return user
     }
 
