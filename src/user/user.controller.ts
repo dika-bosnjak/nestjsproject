@@ -59,10 +59,14 @@ export class UserController {
         return user;
     }
 
+
+
+    
+
     @ApiBearerAuth()
     @ApiOkResponse({type: User, isArray: false})
     @UseGuards(JwtGuard)
-    @Patch(':id')
+    @Patch('me')
     updateProfile(@GetUser('') user: User, @Body() updateUserDto: UserDto) {
       return this.userService.updateProfile(Number(user.id), updateUserDto);
     }

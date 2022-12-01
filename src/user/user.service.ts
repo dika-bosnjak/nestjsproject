@@ -112,8 +112,6 @@ export class UserService {
         }
 
         throw new BadRequestException
-
-
     }
 
     async getUsers(firstName?: string): Promise<User[]>{
@@ -184,8 +182,7 @@ export class UserService {
                 apartment: dto.apartment,
                 city: dto.city,
                 state: dto.state,
-                zip: dto.zip,
-                email: dto.email
+                zip: dto.zip
             }
         })
         //if user does not exists throw err
