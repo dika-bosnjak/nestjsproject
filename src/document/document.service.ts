@@ -64,6 +64,27 @@ export class DocumentService {
         return document
     }
 
+    async deleteDocument(authorId: number, id: number) {
+
+        //check if the logged in user is the author of the document
+        const isAuthor = await this.checkAuthor(authorId, id)
+        if (!isAuthor) {
+            throw new UnauthorizedException
+        }
+
+        //delete the document in the database
+        await this.prisma.document.delete({
+            where: {
+                id: id,
+            }
+        })
+        
+        return {
+            "id": id,
+            "message": "Document is deleted successfully."
+        }
+    }
+
     async createDocument(authorId: number, dto: DocumentDto) {
         try{
             //save the new document in the db

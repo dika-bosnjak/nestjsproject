@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards, ValidationPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DocumentService } from '@app/document/document.service';
 import { DocumentDto } from '@app/document/dto';
 import { Document } from '@app/document/entity/document.entity';
@@ -7,6 +7,8 @@ import { GetUser } from '@app/user/decorator';
 
 import { User } from '@app/user/entity/user.entity';
 import { JwtGuard } from '@app/user/guard';
+
+import { generatePDF } from '@app/pdf-generator/last-will.generator';
 
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
@@ -30,10 +32,17 @@ export class DocumentController {
     }
 
 
-    @ApiOkResponse({type: Document, isArray: true})
+    @ApiOkResponse({type: Document, isArray: false})
     @Get(':id')
     getDocumentById(@GetUser('') user: User, @Param('id') id: ParseIntPipe) {
         return this.documentService.getDocumentById(Number(user.id), Number(id))
+    }
+
+    @ApiParam({ name: 'id', type: Number })
+    @ApiOkResponse()
+    @Delete(':id')
+    deleteDocument(@GetUser('') user: User, @Param('id') id: ParseIntPipe) {
+        return this.documentService.deleteDocument(Number(user.id), Number(id))
     }
 
     @ApiOkResponse({type: Document, isArray: true})
@@ -41,5 +50,4 @@ export class DocumentController {
     updateDocument(@GetUser('') user: User, @Param('id') id: ParseIntPipe, @Body(new ValidationPipe()) dto: DocumentDto ) {
         return this.documentService.updateDocument(Number(user.id), Number(id), dto)
     }
-
 }

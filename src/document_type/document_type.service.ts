@@ -23,7 +23,7 @@ export class DocumentTypeService {
         const document_type = await this.prisma.documentType.create({
             data: {
                 name: dto.name,
-                content: dto.content,
+                content: JSON.parse(String(dto.content)),
             },
         })
         //return the saved document type

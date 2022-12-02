@@ -6,11 +6,18 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiBearerAuth,ApiParam, Api
 import { User } from '@app/user/entity/user.entity';
 import { Token } from '@app/user/entity/token.entity';
 import { AuthDto, UserDto } from '@app/user/dto';
+// import { generatePDF } from '@app/pdf-generator/last-will.generator';
 
 @ApiTags('users')
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService){}
+
+    // @ApiOkResponse()
+    // @Get('print')
+    // printDocument() {
+    //     return generatePDF();
+    // }
 
 
     @ApiNotFoundResponse({
