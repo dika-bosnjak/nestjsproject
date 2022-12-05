@@ -32,7 +32,9 @@ export class DocumentService {
 
 
         //if there are no documents, throw an error
-        if (!documents) throw new NotFoundException
+        if (!documents) {
+            return "No documents"
+        }
         return documents
     }
 
@@ -41,7 +43,9 @@ export class DocumentService {
         //check if the logged in user is the author of the document
         const isAuthor = await this.checkAuthor(authorId, id)
         if (!isAuthor) {
-            throw new UnauthorizedException
+            return {
+                message: "Unauthorized"
+            }
         }
 
         //get the document from the database
@@ -60,7 +64,11 @@ export class DocumentService {
             },
         })
         //if there is no document, throw an error
-        if (!document) throw new NotFoundException
+        if (!document) {
+            return {
+                message: "Document does not exist"
+            }
+        }
         return document
     }
 
@@ -69,7 +77,9 @@ export class DocumentService {
         //check if the logged in user is the author of the document
         const isAuthor = await this.checkAuthor(authorId, id)
         if (!isAuthor) {
-            throw new UnauthorizedException
+            return {
+                message: "Unauthorized"
+            }
         }
 
         //delete the document in the database
@@ -78,7 +88,7 @@ export class DocumentService {
                 id: id,
             }
         })
-        
+
         return {
             "id": id,
             "message": "Document is deleted successfully."
@@ -101,14 +111,15 @@ export class DocumentService {
                         }
                     },
                     content: JSON.parse(String(dto.content))
-
                 },
             })
             //return the saved document
             return document;
             } catch (err) {
                 //if there is any other error, display it
-                throw err;
+                return {
+                    message: err
+                }
             }
     }
 
@@ -117,7 +128,9 @@ export class DocumentService {
         //check if the logged in user is the author of the document
         const isAuthor = this.checkAuthor(authorId, documentId)
         if (!isAuthor) {
-            throw new UnauthorizedException
+            return {
+                message: "Unauthorized"
+            }
         }
 
         //update the document in the db
@@ -130,7 +143,11 @@ export class DocumentService {
             }
         })
         //if user does not exists throw err
-        if (!document) throw new NotFoundException
+        if (!document) {
+            return {
+                message: "Document does not exists"
+            }
+        }
         return document
     }
 

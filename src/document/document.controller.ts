@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UseGuards, ValidationPipe, Response } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DocumentService } from '@app/document/document.service';
 import { DocumentDto } from '@app/document/dto';
 import { Document } from '@app/document/entity/document.entity';
 import { GetUser } from '@app/user/decorator';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 import { User } from '@app/user/entity/user.entity';
 import { JwtGuard } from '@app/user/guard';
@@ -16,6 +18,17 @@ import { generatePDF } from '@app/pdf-generator/last-will.generator';
 @Controller('document')
 export class DocumentController {
     constructor(private documentService: DocumentService){}
+
+    @ApiParam({ name: 'id', type: Number })
+    @Header('content-type', 'application/pdf')
+    @Header('content-disposition', 'attachment; filename=document.pdf')
+    @ApiOkResponse()
+    @Get(':id/print')
+    printDocument(@GetUser('') user: User, @Param('id') id: ParseIntPipe) {
+       this.documentService.getDocumentById(Number(user.id), Number(id)).then(response => generatePDF(user, response));
+       const file = createReadStream(join(process.cwd(), 'PDF_test.pdf'));
+       return new StreamableFile(file);
+    }
 
 
     @ApiOkResponse({type: Document, isArray: true})

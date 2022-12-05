@@ -4,10 +4,6 @@
 
 .env
 
-/src/pdf-generator
-
-PDF_test.pdf
-
 # Logs
 logs
 *.log
