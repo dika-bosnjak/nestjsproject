@@ -8,9 +8,7 @@ export class DocumentTypeService {
     constructor(private prisma: PrismaService) {}
 
     async getAll(): Promise<DocumentType[]>{
-        
         const documentTypes = await this.prisma.documentType.findMany()
-
 
         //if there are no document types, throw an error
         if (!documentTypes) throw new NotFoundException
@@ -29,8 +27,7 @@ export class DocumentTypeService {
         //return the saved document type
         return document_type;
         } catch (err) {
-            //if there is any other error, display it
-            throw err;
+            throw new BadRequestException
         }
     }
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DocumentDto } from '@app/document/dto';
 import { PrismaService } from '@app/prisma/prisma.service';
 import { Document } from '@app/document/entity/document.entity';
@@ -8,7 +8,6 @@ export class DocumentService {
     constructor(private prisma: PrismaService) {}
 
     async getAll(id: number){
-        
         const documents= await this.prisma.document.findMany({
             where: {
                 authorId: id,
@@ -29,25 +28,18 @@ export class DocumentService {
                 }
               },
         })
-
-
-        //if there are no documents, throw an error
         if (!documents) {
-            return "No documents"
+            throw new NotFoundException("No documents.")
         }
         return documents
     }
 
     async getDocumentById(authorId: number, id: number) {
-
         //check if the logged in user is the author of the document
         const isAuthor = await this.checkAuthor(authorId, id)
         if (!isAuthor) {
-            return {
-                message: "Unauthorized"
-            }
+            throw new UnauthorizedException("Unauthorized.")
         }
-
         //get the document from the database
         const document = await this.prisma.document.findFirst({
             where: {
@@ -63,32 +55,24 @@ export class DocumentService {
                 },
             },
         })
-        //if there is no document, throw an error
         if (!document) {
-            return {
-                message: "Document does not exist"
-            }
+            throw new NotFoundException("Document does not exist.")
         }
         return document
     }
 
     async deleteDocument(authorId: number, id: number) {
-
         //check if the logged in user is the author of the document
         const isAuthor = await this.checkAuthor(authorId, id)
         if (!isAuthor) {
-            return {
-                message: "Unauthorized"
-            }
+            throw new UnauthorizedException("Unauthorized.")
         }
-
         //delete the document in the database
         await this.prisma.document.delete({
             where: {
                 id: id,
             }
         })
-
         return {
             "id": id,
             "message": "Document is deleted successfully."
@@ -113,13 +97,9 @@ export class DocumentService {
                     content: JSON.parse(String(dto.content))
                 },
             })
-            //return the saved document
             return document;
             } catch (err) {
-                //if there is any other error, display it
-                return {
-                    message: err
-                }
+                throw new BadRequestException(err)
             }
     }
 
@@ -128,11 +108,8 @@ export class DocumentService {
         //check if the logged in user is the author of the document
         const isAuthor = this.checkAuthor(authorId, documentId)
         if (!isAuthor) {
-            return {
-                message: "Unauthorized"
-            }
+            throw new UnauthorizedException("Unauthorized.")
         }
-
         //update the document in the db
         const document = await this.prisma.document.update({
             where: {
@@ -142,11 +119,8 @@ export class DocumentService {
                 content: JSON.parse(String(dto.content))
             }
         })
-        //if user does not exists throw err
         if (!document) {
-            return {
-                message: "Document does not exists"
-            }
+            throw new BadRequestException("Document could not be updated.")
         }
         return document
     }
@@ -158,7 +132,6 @@ export class DocumentService {
                 id: id,
             },
         })
-        //if there is no document, throw an error
         if (!document) return 0
         else { return 1 }
     }

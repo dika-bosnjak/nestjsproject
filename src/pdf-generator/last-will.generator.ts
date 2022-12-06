@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as PdfPrinter from "pdfmake";
 var converter = require('number-to-words');
 
-export function generatePDF(user: User, document: any): { file_name: string; } {
+export function generatePDF(user: User, document: any): string {
 
     const fonts = {
         Times: {
@@ -18,37 +18,7 @@ export function generatePDF(user: User, document: any): { file_name: string; } {
 
     const doc = document.content
 
-    // const firstName = "Joe"
-    // const lastName = "Sample"
-
-    // const street = "One Main Street"
-    // const apartment = ""
-    // const city = "Raleigh"
-    // const state = "North Carolina"
-    // const zip = "02754"
-
-    // let isMarried = "yes"
-    // const spouse = "Mary Sample"
-    // const spouseBeneficiary = "Residual Estate"
-
-    // let haveChildren = "yes"
-    // const numberOfChildren = "3"
-    // let childInfo = [
-    //     {
-    //         childLastName: "Prezime",
-    //         childFirstName: "Ime"
-    //     }
-    // ]
-
-    // let haveExclusions = "yes"
-    // let exclusions = [
-    //     {
-    //         exclusionFirstName: "John",
-    //         exclusionLastName: "Doe"
-    //     }
-    // ]
-
-    // let executorName = "Jane Doe"
+    let counter = 0
 
     let docDefinition = {
       content: [
@@ -66,8 +36,9 @@ export function generatePDF(user: User, document: any): { file_name: string; } {
     };
 
     if (doc.marriedStatus == "yes" || doc.haveChildren == "yes") {
+        counter = counter + 1
         docDefinition.content.push(
-            { text: '1. FAMILY IDENTIFICATION', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
+            { text: counter  + '. FAMILY IDENTIFICATION', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
         )
 
         if (doc.marriedStatus === "yes") {
@@ -98,32 +69,47 @@ export function generatePDF(user: User, document: any): { file_name: string; } {
     }
 
     if (doc.haveExclusions === "yes") {
-
+        counter = counter + 1
         let stringExclusions = ""
         doc.exclusionsNames.forEach(element => {
             stringExclusions = stringExclusions + " " + element.exclusionFirstName + " " + element.exclusionLastName
         })
         docDefinition.content.push(
-            { text: '2. EXCLUSIONS', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
+            { text: counter + '. EXCLUSIONS', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
             { text: `It is my intention to exclude the following person(s) from receiving any distributions in association
-            with this Last Will and Testament: ${stringExclusions}`, margin: [0, 0], fontSize: 12, alignment:'left', bold:false},
+            with this Last Will and Testament: ${stringExclusions}`, margin: [0, 0], fontSize: 12, alignment:'justify', bold:false},
         )
     }
 
+    counter = counter + 1
     docDefinition.content.push(
-        { text: '3. EXPENSES & TAXES', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
-        { text: `I direct that all my debts, and expenses of my last illness, funeral, and burial, be paid as soon after my death as may be reasonably convenient, and I hereby authorize my Personal Representative, hereinafter appointed, to settle and discharge, in his or her absolute discretion, any claims made against my estate to be first paid.`, margin: [0, 0], fontSize: 12, alignment:'left', bold:false},
-        { text: `I further direct that my Personal Representative shall pay out of my estate any and all estate and inheritance taxes payable by reason of my death in respect of all items included in the computation of such taxes, whether passing under this Will or otherwise. Said taxes shall be paid by my Personal Representative as if such taxes were my debts without recovery of any part of such tax payments from anyone who receives any item included in such computation.`, margin: [0, 10], fontSize: 12, alignment:'left', bold:false},
+        { text: counter + '. EXPENSES & TAXES', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
+        { text: `I direct that all my debts, and expenses of my last illness, funeral, and burial, be paid as soon after my death as may be reasonably convenient, and I hereby authorize my Personal Representative, hereinafter appointed, to settle and discharge, in his or her absolute discretion, any claims made against my estate to be first paid.`, margin: [0, 0], fontSize: 12, alignment:'justify', bold:false},
+        { text: `I further direct that my Personal Representative shall pay out of my estate any and all estate and inheritance taxes payable by reason of my death in respect of all items included in the computation of such taxes, whether passing under this Will or otherwise. Said taxes shall be paid by my Personal Representative as if such taxes were my debts without recovery of any part of such tax payments from anyone who receives any item included in such computation.`, margin: [0, 10], fontSize: 12, alignment:'justify', bold:false},
     )
+
+    // counter = counter + 1
+    // docDefinition.content.push(
+    //     { text: counter + '. SPECIAL BEQUESTS', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
+    //     { text: `Aside from my Residual Estate, there shall be the following four (4) individuals to receive special bequests.`, margin: [0, 0], fontSize: 12, alignment:'justify', bold:false},
+    //     { text: `a`, margin: [0, 10], fontSize: 12, alignment:'justify', bold:false},
+    // )
+
+    // counter = counter + 1
+    // docDefinition.content.push(
+    //     { text: counter + '. PERSONAL PROPERTY', margin: [0, 10], fontSize: 12, alignment:'left', bold:true},
+    //     { text: `I direct that all of my personal property that has not been directed as specific bequests or a part of my residual estate be distributed to my spouse and children to be equally distributed amongst themselves .`, margin: [0, 10], fontSize: 12, alignment:'justify', bold:false},
+    // )
 
 
 
 
  
     const options = { }
-    let file_name = 'PDF_test' + '.pdf';
+    const date = new Date();
+    let file_name = 'LastWill_' + user.firstName + '_' + user.lastName + '_' + String(date.getDate()) + '-' +  String(date.getMonth()) + '-' +  String(date.getFullYear())  + '.pdf';
     const pdfDoc = printer.createPdfKitDocument(docDefinition, options);
     pdfDoc.pipe(fs.createWriteStream(file_name));
     pdfDoc.end();
-    return pdfDoc;
+    return file_name;
 }
