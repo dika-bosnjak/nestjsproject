@@ -21,15 +21,15 @@ export class DocumentController {
 
     @ApiParam({ name: 'id', type: Number })
     @Header('content-type', 'application/pdf')
-    @Header('content-disposition', 'attachment; filename=document.pdf')
+    @Header('content-disposition', 'attachment')
     @ApiOkResponse()
     @Get(':id/print')
-    printDocument(@GetUser('') user: User, @Param('id') id: ParseIntPipe) {
-       this.documentService.getDocumentById(Number(user.id), Number(id)).then(response => generatePDF(user, response));
-       const file = createReadStream(join(process.cwd(), 'PDF_test.pdf'));
-       return new StreamableFile(file);
+    async printDocument(@GetUser('') user: User, @Param('id') id: ParseIntPipe) {
+       let document = await this.documentService.getDocumentById(Number(user.id), Number(id));
+       let fileName = generatePDF(user, document)
+       const file = createReadStream(join(process.cwd(), fileName));
+       return new StreamableFile(file)
     }
-
 
     @ApiOkResponse({type: Document, isArray: true})
     @Get('')
@@ -37,13 +37,11 @@ export class DocumentController {
         return this.documentService.getAll(Number(user.id))
     }
 
-
     @ApiCreatedResponse({type: Document})
     @Post('')
     createDocument(@GetUser('') user: User, @Body(new ValidationPipe()) dto: DocumentDto) {
         return this.documentService.createDocument(Number(user.id), dto);
     }
-
 
     @ApiOkResponse({type: Document, isArray: false})
     @Get(':id')
