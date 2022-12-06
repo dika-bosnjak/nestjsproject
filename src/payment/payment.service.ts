@@ -19,8 +19,9 @@ export class PaymentService {
             quantity: 1,
           },
         ],
-        success_url: 'http://localhost:3300/payment/success',
-        cancel_url: 'http://localhost:3300/payment/cancel',
+        success_url:
+          'http://localhost:3000/payment/success',
+        cancel_url: 'http://localhost:3000/payment/cancel',
       });
     return session;
   }
