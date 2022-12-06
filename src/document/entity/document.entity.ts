@@ -25,4 +25,7 @@ export class Document {
     @ApiProperty()
     content: Prisma.JsonValue;
 
+    @ApiProperty()
+    isCompleted: boolean;
+
 }

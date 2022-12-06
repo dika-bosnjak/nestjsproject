@@ -94,7 +94,8 @@ export class DocumentService {
                             id: dto.documentTypeId
                         }
                     },
-                    content: JSON.parse(String(dto.content))
+                    content: JSON.parse(String(dto.content)),
+                    isCompleted: dto.isCompleted
                 },
             })
             return document;
@@ -116,7 +117,8 @@ export class DocumentService {
                 id: documentId
             },
             data: {
-                content: JSON.parse(String(dto.content))
+                content: JSON.parse(String(dto.content)),
+                isCompleted: dto.isCompleted
             }
         })
         if (!document) {

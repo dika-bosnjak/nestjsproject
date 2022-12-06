@@ -12,4 +12,8 @@ export class DocumentDto{
     @IsJSON()
     @IsNotEmpty()
     content: Prisma.InputJsonValue;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    isCompleted: boolean;
 }
