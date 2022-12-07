@@ -18,7 +18,7 @@ Use the node package manager [npm](https://www.npmjs.com/package/npm) to install
 npm install
 ```
 ### Part 2
-## Postgres dagtabase
+## Postgres database
 
 The server works with the postgresql database so you make sure you have it installed.
 
