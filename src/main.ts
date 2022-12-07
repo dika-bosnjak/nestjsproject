@@ -20,8 +20,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
   .addBearerAuth()
-  .setTitle('Nest API')
-  .setDescription('description')
+  .setTitle('Viking Project')
   .setVersion('1.0')
   .build();
 

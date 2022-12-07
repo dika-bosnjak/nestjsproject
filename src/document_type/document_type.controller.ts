@@ -7,26 +7,24 @@ import { DocumentTypeDto } from './dto';
 @ApiTags('document-type')
 @Controller('document-type')
 export class DocumentTypeController {
-    constructor(private documentTypeService: DocumentTypeService){}
+  constructor(private documentTypeService: DocumentTypeService) {}
 
-    @ApiOkResponse({type: DocumentType, isArray: true})
-    @Get('')
-    getDocumentTypes(): any {
-        return this.documentTypeService.getAll()
-    }
+  @ApiOkResponse({ type: DocumentType, isArray: true })
+  @Get('')
+  getDocumentTypes(): Promise<DocumentType[]> {
+    return this.documentTypeService.getAll();
+  }
 
-    @ApiCreatedResponse({type: DocumentType})
-    @Post('')
-    createDocumetType(@Body(new ValidationPipe()) dto: DocumentTypeDto) {
-        return this.documentTypeService.createDocumentType(dto);
-    }
+  @ApiCreatedResponse({ type: DocumentType })
+  @Post('')
+  createDocumetType(@Body(new ValidationPipe()) dto: DocumentTypeDto): Promise<any> {
+    return this.documentTypeService.createDocumentType(dto);
+  }
 
-    @ApiParam({ name: 'id', type: Number })
-    @ApiOkResponse({type: DocumentType, isArray: false})
-    @Get(':id')
-    getDocumentTypeById(@Param('id') id: ParseIntPipe): any {
-        return this.documentTypeService.getDocumentTypeById(Number(id))
-    }
-
-
+  @ApiParam({ name: 'id', type: Number })
+  @ApiOkResponse({ type: DocumentType, isArray: false })
+  @Get(':id')
+  getDocumentTypeById(@Param('id') id: ParseIntPipe): Promise<any> {
+    return this.documentTypeService.getDocumentTypeById(Number(id));
+  }
 }

@@ -5,137 +5,129 @@ import { Document } from '@app/document/entity/document.entity';
 
 @Injectable()
 export class DocumentService {
-    constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
-    async getAll(id: number){
-        const documents= await this.prisma.document.findMany({
-            where: {
-                authorId: id,
+  //getAll function gets all documents per user and returns the document with the info about document type and author
+  async getAll(authorId: number): Promise<{}> {
+    const documents = await this.prisma.document.findMany({
+      where: {
+        authorId: authorId,
+      },
+      orderBy: [
+        {
+          updatedAt: 'desc',
+        },
+      ],
+      include: {
+        documentType: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+    if (!documents) throw new NotFoundException('No documents.');
+    return documents;
+  }
+
+  //getDocumentById function checks whether the user is the author of the document and returns the document from the database with the info about document type and author
+  async getDocumentById(authorId: number, documentId: number): Promise<{}> {
+    const isAuthor = await this.checkAuthor(authorId, documentId);
+    if (!isAuthor) throw new UnauthorizedException('Unauthorized.');
+
+    const document = await this.prisma.document.findFirst({
+      where: {
+        id: documentId,
+      },
+      include: {
+        documentType: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    if (!document) throw new NotFoundException('Document does not exist.');
+    return document;
+  }
+
+  //deleteDocument function checks whether the user is the author of the document, deletes the file and returns the document id with the success message
+  async deleteDocument(authorId: number, documentId: number): Promise<{ id: number; message: string }> {
+    const isAuthor = await this.checkAuthor(authorId, documentId);
+    if (!isAuthor) throw new UnauthorizedException('Unauthorized.');
+
+    await this.prisma.document.delete({
+      where: {
+        id: documentId,
+      },
+    });
+    return {
+      id: documentId,
+      message: 'Document is deleted successfully.',
+    };
+  }
+
+  //createDocument function creates the document in the database and returns the document from the database with the info about document type and author
+  async createDocument(authorId: number, dto: DocumentDto): Promise<{}> {
+    try {
+      const document = await this.prisma.document.create({
+        data: {
+          author: {
+            connect: {
+              id: authorId,
             },
-            include: {
-                documentType: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-                author: {
-                    select: {
-                        id:true,
-                        firstName: true,
-                        lastName: true
-                    }
-                }
-              },
-        })
-        if (!documents) {
-            throw new NotFoundException("No documents.")
-        }
-        return documents
-    }
-
-    async getDocumentById(authorId: number, id: number) {
-        //check if the logged in user is the author of the document
-        const isAuthor = await this.checkAuthor(authorId, id)
-        if (!isAuthor) {
-            throw new UnauthorizedException("Unauthorized.")
-        }
-        //get the document from the database
-        const document = await this.prisma.document.findFirst({
-            where: {
-                authorId: authorId,
-                id: id,
+          },
+          documentType: {
+            connect: {
+              id: dto.documentTypeId,
             },
-            include: {
-                documentType: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                },
-            },
-        })
-        if (!document) {
-            throw new NotFoundException("Document does not exist.")
-        }
-        return document
+          },
+          content: JSON.parse(String(dto.content)),
+          isCompleted: dto.isCompleted,
+        },
+      });
+      return document;
+    } catch (err) {
+      throw new BadRequestException(err);
     }
+  }
 
-    async deleteDocument(authorId: number, id: number) {
-        //check if the logged in user is the author of the document
-        const isAuthor = await this.checkAuthor(authorId, id)
-        if (!isAuthor) {
-            throw new UnauthorizedException("Unauthorized.")
-        }
-        //delete the document in the database
-        await this.prisma.document.delete({
-            where: {
-                id: id,
-            }
-        })
-        return {
-            "id": id,
-            "message": "Document is deleted successfully."
-        }
-    }
+  //updateDocument function updates the document and returns the document from the database with the info about document type and author
+  async updateDocument(authorId: number, documentId: number, dto: DocumentDto): Promise<{}> {
+    const isAuthor = this.checkAuthor(authorId, documentId);
+    if (!isAuthor) throw new UnauthorizedException('Unauthorized.');
 
-    async createDocument(authorId: number, dto: DocumentDto) {
-        try{
-            //save the new document in the db
-            const document = await this.prisma.document.create({
-                data: {
-                    author: {
-                        connect: {
-                            id: authorId
-                        }
-                    },
-                    documentType: {
-                        connect: {
-                            id: dto.documentTypeId
-                        }
-                    },
-                    content: JSON.parse(String(dto.content)),
-                    isCompleted: dto.isCompleted
-                },
-            })
-            return document;
-            } catch (err) {
-                throw new BadRequestException(err)
-            }
-    }
+    const document = await this.prisma.document.update({
+      where: {
+        id: documentId,
+      },
+      data: {
+        content: JSON.parse(String(dto.content)),
+        isCompleted: dto.isCompleted,
+      },
+    });
+    if (!document) throw new BadRequestException('Document could not be updated.');
+    return document;
+  }
 
-    async updateDocument(authorId: number, documentId: number, dto: DocumentDto) {
-
-        //check if the logged in user is the author of the document
-        const isAuthor = this.checkAuthor(authorId, documentId)
-        if (!isAuthor) {
-            throw new UnauthorizedException("Unauthorized.")
-        }
-        //update the document in the db
-        const document = await this.prisma.document.update({
-            where: {
-                id: documentId
-            },
-            data: {
-                content: JSON.parse(String(dto.content)),
-                isCompleted: dto.isCompleted
-            }
-        })
-        if (!document) {
-            throw new BadRequestException("Document could not be updated.")
-        }
-        return document
-    }
-
-    async checkAuthor(authorId: number, id: number) {
-        const document = await this.prisma.document.findFirst({
-            where: {
-                authorId: authorId,
-                id: id,
-            },
-        })
-        if (!document) return 0
-        else { return 1 }
-    }
-
+  //checkAuthor function checkes whether the logged in user is the author of the document, returns 1 if the logged in user is the author, otherwise 0
+  async checkAuthor(authorId: number, documentId: number): Promise<boolean> {
+    const document = await this.prisma.document.findFirst({
+      where: {
+        authorId: authorId,
+        id: documentId,
+      },
+    });
+    if (!document) return false;
+    return true;
+  }
 }
