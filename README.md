@@ -7,7 +7,7 @@ This is the backend for the survey document generator being developed within the
 
 Clone  the repository.
 
-Change directory into the repository
+Change directory into the repository.
 ```bash
 cd nestjsproject
 ```
@@ -30,20 +30,20 @@ You can look it up [here](https://www.postgresql.org/docs/current/tutorial-insta
 ```javascript
 //.env
 
-// replace the user,port, password and host with the ones apropriate for your system
+// replace the user,port, password and host with the ones apropriate for your system.
 DATABASE_URL="postgresql://user:pass@localhost:port/viking?schema=public"
 
-//replace the secret with your own
+//replace the secret with your own.
 JWT_SECRET="secret"
 
-//replace the stripe key with the one you can see on your stripe developer dashboard
+//replace the stripe key with the one you can see on your stripe developer dashboard.
 STRIPE_SECRET_KEY="stripekey"
 
 ```
 ### Part 4
 ## Executing migrations
 
-While in the repository directory, execute the prisma migration command
+While in the repository directory, execute the prisma migration command.
 ```bash
 npx prisma migrate dev
 ```
