@@ -5,9 +5,12 @@ This is the backend for the survey document generator being developed within the
 ## Installation
 ### Part 1
 
-Clone  the repocsitory.
+Clone  the repository.
 
 Change directory into the repository
+```bash
+cd nestjsproject
+```
 
 Use the node package manager [npm](https://www.npmjs.com/package/npm) to install the required dependencies.
 
